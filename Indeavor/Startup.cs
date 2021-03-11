@@ -22,7 +22,9 @@ namespace Indeavor
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<SkillContext>(opt => opt.UseInMemoryDatabase("SkillList"));
-            services.AddControllers();
+
+            services.AddControllers().AddNewtonsoftJson();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Indeavor", Version = "v1" });

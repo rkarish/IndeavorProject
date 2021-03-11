@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Indeavor.Models;
+using Microsoft.AspNetCore.JsonPatch;
+using System;
 
 namespace Indeavor.Controllers
 {
@@ -25,7 +27,7 @@ namespace Indeavor.Controllers
             return await _context.Skills.ToListAsync();
         }
 
-        // GET: api/Skills/5
+        // GET: api/Skills/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<Skill>> GetSkill(long id)
         {
@@ -39,7 +41,7 @@ namespace Indeavor.Controllers
             return skill;
         }
 
-        // PUT: api/Skills/5
+        // PUT: api/Skills/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> PutSkill(long id, Skill skill)
         {
@@ -69,28 +71,50 @@ namespace Indeavor.Controllers
             return NoContent();
         }
 
+        // PATCH: api/Skills/{id}
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> PatchSkill(long id, [FromBody] JsonPatchDocument<Skill> patchSkill)
+        {
+            var skill = await _context.Skills.FindAsync(id);
+
+            if (skill == null)
+            {
+                return NotFound();
+            }
+
+            if (patchSkill != null)
+            {
+                patchSkill.ApplyTo(skill, ModelState);
+            }
+
+            return Ok(skill);
+        }
+
         // POST: api/Skills
         [HttpPost]
         public async Task<ActionResult<Skill>> PostSkill(Skill skill)
         {
             _context.Skills.Add(skill);
-            await _context.SaveChangesAsync();
+            skill.CreationTime = DateTime.Now;
 
-            //return CreatedAtAction("GetSkill", new { id = skill.Id }, skill);
+            await _context.SaveChangesAsync();
+            
             return CreatedAtAction(nameof(GetSkill), new { id = skill.Id }, skill);
         }
 
-        // DELETE: api/Skills/5
+        // DELETE: api/Skills/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSkill(long id)
         {
             var skill = await _context.Skills.FindAsync(id);
+
             if (skill == null)
             {
                 return NotFound();
             }
 
             _context.Skills.Remove(skill);
+
             await _context.SaveChangesAsync();
 
             return NoContent();
